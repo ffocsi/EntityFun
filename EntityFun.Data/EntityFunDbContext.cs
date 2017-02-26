@@ -3,6 +3,7 @@ using EntityFun.Data.EntityConfig;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +15,8 @@ namespace EntityFun.Data
         public EntityFunDbContext()
             :base (@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Dogs;Integrated Security=True")
         {
-            Database
-                .SetInitializer<EntityFunDbContext>(new DropCreateDatabaseAlways<EntityFunDbContext>());
+            Database.SetInitializer<EntityFunDbContext>(new DropCreateDatabaseAlways<EntityFunDbContext>());
+            Database.Log = s => Debug.WriteLine(s);
         }
 
         public static EntityFunDbContext Create()

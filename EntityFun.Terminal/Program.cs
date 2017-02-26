@@ -117,7 +117,7 @@ namespace EntityFun.Terminal
                     .ToList();
                 foreach (var dog in allDogs)
                 {
-                    //Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
+                    Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
                 }
             }
             _stopWatch.Stop();
@@ -158,14 +158,31 @@ namespace EntityFun.Terminal
                     });
                 foreach (var dog in allDogs)
                 {
-                    //Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
+                    Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
                 }
             }
             _stopWatch.Stop();
             elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
             elapsedTicks = _stopWatch.ElapsedTicks;
             Console.WriteLine("Limited stuff took {0} milliseconds and {1} ticks!", elapsedMilliseconds, elapsedTicks);
+            var dogService = new DogService();
+            var dog1 = new Dog { Id = 1 };
+            var dog2 = new Dog { Id = _random.Next(400, 800) };
 
+            dogService.MakeFriend(dog1, dog2);
+            using (var context = EntityFunDbContext.Create())
+            {
+                var test = context.Dogs
+                    .Include(x => x.Friends)
+                    .First();
+
+                foreach (var friend in test.Friends)
+                {
+                    Console.WriteLine("{0} - {1}", friend.Id, friend.Name);
+                }
+            }
+
+            var newDog = dogService.AddDog(new Dog { Name = "Brenford", DateOfBirth = DateTime.Now.AddYears(-2) });
             Console.ReadKey();
         }
     }

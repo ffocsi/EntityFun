@@ -12,6 +12,11 @@ namespace EntityFun.Services
 {
     public class DogService
     {
+        /// <summary>
+        /// Demonstrates how to add an item in Entity Framework
+        /// </summary>
+        /// <param name="dog"></param>
+        /// <returns></returns>
         public int AddDog(Dog dog)
         {
             using (var context = EntityFunDbContext.Create())
@@ -22,6 +27,11 @@ namespace EntityFun.Services
             }
         }
 
+        /// <summary>
+        /// Demonstrates a performance way of adding disconnected items to many to many table
+        /// </summary>
+        /// <param name="dog"></param>
+        /// <param name="friend"></param>
         public void MakeFriend(Dog dog, Dog friend)
         {
             using (var context = EntityFunDbContext.Create())
