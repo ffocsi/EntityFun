@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EntityFun.Data
+namespace EntityFun.Core
 {
-    public class EntityFunDb : DbContext
+    public enum DogBreed : int
     {
+        YorkshireTerrier = 1,
+        Labrador = 2,
+        Chihuahua = 3
     }
 }

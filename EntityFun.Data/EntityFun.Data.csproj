@@ -49,12 +49,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityFunDb.cs" />
+    <Compile Include="EntityConfig\HumanEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfig\DogEntityTypeConfiguration.cs" />
+    <Compile Include="EntityFunDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EntityFun.Core\EntityFun.Core.csproj">
+      <Project>{12eb4729-a09e-492f-aaba-36c9facb67bb}</Project>
+      <Name>EntityFun.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
