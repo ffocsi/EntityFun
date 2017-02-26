@@ -27,7 +27,7 @@ namespace EntityFun.Services
         }
 
         /// <summary>
-        /// Demonstrates a performant way of changing a navigation property in EF
+        /// Demonstrates a performant way of changing a navigation property disconnected
         /// </summary>
         /// <param name="human"></param>
         /// <param name="dog"></param>
@@ -37,7 +37,7 @@ namespace EntityFun.Services
             {
                 context.Humans.Attach(human);
                 context.Dogs.Attach(dog);
-                context.Entry(dog).Property(x => x.Name).IsModified = true;
+
                 dog.Owner = human;
 
                 context.SaveChanges();
