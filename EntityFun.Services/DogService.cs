@@ -56,5 +56,38 @@ namespace EntityFun.Services
                 }
             }
         }
+
+        public int AddDogSync(Dog dog)
+        {
+            using (var context = EntityFunDbContext.Create())
+            {
+                context.Dogs.Add(dog);
+                context.SaveChanges();
+                return dog.Id;
+            }
+        }
+
+        public void MakeFriendSync(Dog dog, Dog friend)
+        {
+            using (var context = EntityFunDbContext.Create())
+            {
+                var friendshipExists = context.Dogs.Any(x => x.Id == dog.Id && x.Friends.Any(y => y.Id == friend.Id));
+                var dogsExist = context.Dogs.Count(x => x.Id == dog.Id || x.Id == friend.Id) == 2;
+
+                if (!friendshipExists && dogsExist)
+                {
+                    dog.Friends = new List<Dog>();
+                    friend.Friends = new List<Dog>();
+
+                    context.Dogs.Attach(dog);
+                    context.Dogs.Attach(friend);
+
+                    dog.Friends.Add(friend);
+                    friend.Friends.Add(dog);
+
+                    context.SaveChanges();
+                }
+            }
+        }
     }
 }

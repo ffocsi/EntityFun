@@ -15,5 +15,9 @@ namespace EntityFun.Services
         Task<int> AddDogAsync(Dog dog);
         [OperationContract]
         Task MakeFriendAsync(Dog dog, Dog friend);
+        [OperationContract]
+        int AddDogSync(Dog dog);
+        [OperationContract]
+        void MakeFriendSync(Dog dog, Dog friend);
     }
 }

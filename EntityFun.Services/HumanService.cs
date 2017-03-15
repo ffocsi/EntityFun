@@ -38,21 +38,37 @@ namespace EntityFun.Services
         {
             using (var context = EntityFunDbContext.Create())
             {
-                try
-                {
-                    context.Humans.Attach(human);
-                    context.Dogs.Attach(dog);
+                context.Humans.Attach(human);
+                context.Dogs.Attach(dog);
 
-                    dog.Owner = human;
+                dog.Owner = human;
 
-                    await context.SaveChangesAsync();
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine(exception.Message);
-                }
-                
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public int AddHumanSync(Human human)
+        {
+            using (var context = EntityFunDbContext.Create())
+            {
+                context.Humans.Add(human);
+                context.SaveChanges();
+                return human.Id;
+            }
+        }
+
+        public void AdoptDogSync(Human human, Dog dog)
+        {
+            using (var context = EntityFunDbContext.Create())
+            {
+                context.Humans.Attach(human);
+                context.Dogs.Attach(dog);
+
+                dog.Owner = human;
+
+                context.SaveChanges();
             }
         }
     }
 }
+

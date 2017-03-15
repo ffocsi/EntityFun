@@ -30,6 +30,78 @@ namespace EntityFun.Terminal
             "Fido", "Bonny", "Zoidberg", "Cujo"
         };
 
+        private static void DoEverythingSync()
+        {
+            //var humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
+            //var dogService = InProcFactory.CreateInstance<DogService, IDogService>();
+            var humanService = new HumanService();
+            var dogService = new DogService();
+
+            var humanRecord = new List<Human>();
+            var dogRecord = new List<Dog>();
+
+            for (int i = 0; i < 1000; i++)
+            {
+                var newHuman = new Human
+                {
+                    DateOfBirth = DateTime.Today.AddYears(_random.Next(20, 50) * -1),
+                    Forename = _forenames[_random.Next(0, _forenames.Length)],
+                    Surname = _surnames[_random.Next(0, _surnames.Length)]
+                };
+
+                newHuman.Id = humanService.AddHumanSync(newHuman);
+                humanRecord.Add(newHuman);
+            }
+
+            for (int i = 0; i < 1000; i++)
+            {
+                var newDog = new Dog
+                {
+                    Breed = (DogBreed)_random.Next(1, 3),
+                    DateOfBirth = DateTime.Today.AddYears(_random.Next(3, 12) * -1),
+                    Name = _dognames[_random.Next(0, _dognames.Length)]
+                };
+
+                newDog.Id = dogService.AddDogSync(newDog);
+                dogRecord.Add(newDog);
+            }
+
+            for (int i = 0; i < 1000; i++)
+            {
+                var firstFriendId = _random.Next(0, 999);
+                dogService.MakeFriendSync(dogRecord[i], dogRecord[firstFriendId]);
+
+                var secondFriendId = _random.Next(0, 999);
+                while (secondFriendId == firstFriendId)
+                {
+                    secondFriendId = _random.Next(0, 999);
+                }
+                dogService.MakeFriendSync(dogRecord[i], dogRecord[secondFriendId]);
+            }
+
+            for (int i = 0; i < 1000; i++)
+            {
+                humanService.AdoptDogSync(humanRecord[i], dogRecord[i]);
+            }
+
+            using (var context = EntityFunDbContext.Create())
+            {
+                var dogCount = context.Dogs.Count();
+                Console.WriteLine("There are {0} dogs in the system", dogCount);
+
+                var humanCount = context.Humans.Count();
+                Console.WriteLine("There are {0} humans in the system", humanCount);
+
+                var dogFriends = context.Dogs.SelectMany(x => x.Friends).Count();
+                Console.WriteLine(dogFriends);
+
+                var dogsWithManyFriends = context.Dogs.Count(x => x.Friends.Count > 2);
+                Console.WriteLine("{0} dogs have more than 2 friends", dogsWithManyFriends);
+
+                Console.WriteLine("{0} dogs have 0 friends", context.Dogs.Count(x => x.Friends.Count == 0));
+            }
+        }
+
         private static async Task DoEverything()
         {
             var humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
@@ -116,7 +188,8 @@ namespace EntityFun.Terminal
         public static void Main(string[] args)
         {
             _stopWatch.Start();
-            DoEverything().Wait();
+            //DoEverything().Wait();
+            DoEverythingSync();
             _stopWatch.Stop();
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
             var elapsedTicks = _stopWatch.ElapsedTicks;
