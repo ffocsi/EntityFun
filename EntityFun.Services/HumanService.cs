@@ -3,26 +3,29 @@ using EntityFun.Data;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EntityFun.Services
 {
-    public class HumanService
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
+    public class HumanService : IHumanService
     {
         /// <summary>
         /// Demonstrates how to add an item in Entity Framework
         /// </summary>
         /// <param name="human"></param>
         /// <returns></returns>
-        public int AddHuman(Human human)
+        public async Task<int> AddHuman(Human human)
         {
             using (var context = EntityFunDbContext.Create())
             {
                 context.Humans.Add(human);
-                context.SaveChanges();
-                return human.Id;
+                await context.SaveChangesAsync();
+                return await Task.FromResult(human.Id);
             }
         }
 
@@ -31,16 +34,24 @@ namespace EntityFun.Services
         /// </summary>
         /// <param name="human"></param>
         /// <param name="dog"></param>
-        public void AdoptDog(Human human, Dog dog)
+        public async Task AdoptDog(Human human, Dog dog)
         {
             using (var context = EntityFunDbContext.Create())
             {
-                context.Humans.Attach(human);
-                context.Dogs.Attach(dog);
+                try
+                {
+                    context.Humans.Attach(human);
+                    context.Dogs.Attach(dog);
 
-                dog.Owner = human;
+                    dog.Owner = human;
 
-                context.SaveChanges();
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception.Message);
+                }
+                
             }
         }
     }

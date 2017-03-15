@@ -5,25 +5,27 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EntityFun.Services
 {
-    public class DogService
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
+    public class DogService : IDogService
     {
         /// <summary>
         /// Demonstrates how to add an item in Entity Framework
         /// </summary>
         /// <param name="dog"></param>
         /// <returns></returns>
-        public int AddDog(Dog dog)
+        public async Task<int> AddDog(Dog dog)
         {
             using (var context = EntityFunDbContext.Create())
             {
                 context.Dogs.Add(dog);
-                context.SaveChanges();
-                return dog.Id;
+                await context.SaveChangesAsync();
+                return await Task.FromResult(dog.Id);
             }
         }
 
@@ -32,13 +34,14 @@ namespace EntityFun.Services
         /// </summary>
         /// <param name="dog"></param>
         /// <param name="friend"></param>
-        public void MakeFriend(Dog dog, Dog friend)
+        public async Task MakeFriend(Dog dog, Dog friend)
         {
             using (var context = EntityFunDbContext.Create())
             {
                 var friendshipExists = context.Dogs.Any(x => x.Id == dog.Id && x.Friends.Any(y => y.Id == friend.Id));
+                var dogsExist = context.Dogs.Count(x => x.Id == dog.Id || x.Id == friend.Id) == 2;
 
-                if (!friendshipExists)
+                if (!friendshipExists && dogsExist)
                 {
                     dog.Friends = new List<Dog>();
                     friend.Friends = new List<Dog>();
@@ -49,7 +52,7 @@ namespace EntityFun.Services
                     dog.Friends.Add(friend);
                     friend.Friends.Add(dog);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
             }
         }

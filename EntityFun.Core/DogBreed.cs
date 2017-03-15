@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EntityFun.Core
 {
+    [DataContract]
     public enum DogBreed : int
     {
-        YorkshireTerrier = 1,
-        Labrador = 2,
-        Chihuahua = 3
+        [EnumMember]
+        YorkshireTerrier,
+        [EnumMember]
+        Labrador,
+        [EnumMember]
+        Chihuahua
     }
 }

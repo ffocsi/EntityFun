@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ServiceModelEx;
 
 namespace EntityFun.Terminal
 {
@@ -29,57 +30,70 @@ namespace EntityFun.Terminal
             "Fido", "Bonny", "Zoidberg", "Cujo"
         };
 
-        private static void DoEverything()
+        private static async Task DoEverything()
         {
-            var humanService = new HumanService();
-            var dogService = new DogService();
+            var humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
+            var dogService = InProcFactory.CreateInstance<DogService, IDogService>();
+            //var humanService = new HumanService();
+            //var dogService = new DogService();
 
             var humanRecord = new List<Human>();
             var dogRecord = new List<Dog>();
 
-            for (int i = 0; i < 1000; i++)
-            {
-                var newHuman = new Human
+            var numberOfIterations = 1000;
+
+            var humanAddTasks = Enumerable.Range(0, numberOfIterations)
+                .Select(async i =>
                 {
-                    DateOfBirth = DateTime.Today.AddYears(_random.Next(20, 50) * -1),
-                    Forename = _forenames[_random.Next(0, _forenames.Length)],
-                    Surname = _surnames[_random.Next(0, _surnames.Length)]
-                };
+                    var newHuman = new Human
+                    {
+                        DateOfBirth = DateTime.Today.AddYears(_random.Next(20, 50) * -1),
+                        Forename = _forenames[_random.Next(0, _forenames.Length)],
+                        Surname = _surnames[_random.Next(0, _surnames.Length)]
+                    };
 
-                newHuman.Id = humanService.AddHuman(newHuman);
-                humanRecord.Add(newHuman);
-            }
+                    newHuman.Id = await humanService.AddHuman(newHuman);
+                    humanRecord.Add(newHuman);
+                });
+            await Task.WhenAll(humanAddTasks);
 
-            for (int i = 0; i < 1000; i++)
-            {
-                var newDog = new Dog
+            var dogAddTasks = Enumerable.Range(0, numberOfIterations)
+                .Select(async i =>
                 {
-                    Breed = (DogBreed)_random.Next(1, 3),
-                    DateOfBirth = DateTime.Today.AddYears(_random.Next(3, 12) * -1),
-                    Name = _dognames[_random.Next(0, _dognames.Length)]
-                };
+                    var newDog = new Dog
+                    {
+                        Breed = (DogBreed)_random.Next(1, 3),
+                        DateOfBirth = DateTime.Today.AddYears(_random.Next(3, 12) * -1),
+                        Name = _dognames[_random.Next(0, _dognames.Length)]
+                    };
 
-                newDog.Id = dogService.AddDog(newDog);
-                dogRecord.Add(newDog);
-            }
-
-            for (int i = 0; i < 1000; i++)
-            {
-                var firstFriendId = _random.Next(0, 999);
-                dogService.MakeFriend(dogRecord[i], dogRecord[firstFriendId]);
-
-                var secondFriendId = _random.Next(0, 999);
-                while (secondFriendId == firstFriendId)
+                    newDog.Id = await dogService.AddDog(newDog);
+                    dogRecord.Add(newDog);
+                });
+            await Task.WhenAll(dogAddTasks);
+            
+            var dogFriendTasks = Enumerable.Range(0, numberOfIterations)
+                .Select(async i =>
                 {
-                    secondFriendId = _random.Next(0, 999);
-                }
-                dogService.MakeFriend(dogRecord[i], dogRecord[secondFriendId]);
-            }
+                    var firstFriendId = _random.Next(0, numberOfIterations - 1);
+                    await dogService.MakeFriend(dogRecord[i], dogRecord[firstFriendId]);
 
-            for (int i = 0; i < 1000; i++)
-            {
-                humanService.AdoptDog(humanRecord[i], dogRecord[i]);
-            }
+                    var secondFriendId = _random.Next(0, numberOfIterations - 1);
+                    while (secondFriendId == firstFriendId)
+                    {
+                        secondFriendId = _random.Next(0, numberOfIterations - 1);
+                    }
+
+                    await dogService.MakeFriend(new Dog { Id = i }, new Dog { Id = secondFriendId });
+                });
+            await Task.WhenAll(dogFriendTasks);
+
+            var adoptDogTasks = Enumerable.Range(0, numberOfIterations)
+                .Select(async i =>
+                {
+                    await humanService.AdoptDog(humanRecord[i], dogRecord[i]);
+                });
+            await Task.WhenAll(adoptDogTasks);
 
             using (var context = EntityFunDbContext.Create())
             {
@@ -90,7 +104,7 @@ namespace EntityFun.Terminal
                 Console.WriteLine("There are {0} humans in the system", humanCount);
 
                 var dogFriends = context.Dogs.SelectMany(x => x.Friends).Count();
-                Console.WriteLine(dogFriends);
+                Console.WriteLine("There are {0} dog friend combos", dogFriends);
 
                 var dogsWithManyFriends = context.Dogs.Count(x => x.Friends.Count > 2);
                 Console.WriteLine("{0} dogs have more than 2 friends", dogsWithManyFriends);
@@ -102,7 +116,7 @@ namespace EntityFun.Terminal
         public static void Main(string[] args)
         {
             _stopWatch.Start();
-            DoEverything();
+            DoEverything().Wait();
             _stopWatch.Stop();
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
             var elapsedTicks = _stopWatch.ElapsedTicks;
@@ -117,7 +131,7 @@ namespace EntityFun.Terminal
                     .ToList();
                 foreach (var dog in allDogs)
                 {
-                    Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
+                    Debug.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
                 }
             }
             _stopWatch.Stop();
@@ -158,7 +172,7 @@ namespace EntityFun.Terminal
                     });
                 foreach (var dog in allDogs)
                 {
-                    Console.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
+                    Debug.WriteLine("{0} is a great dog, his owner is {1} {2} and his best friend is {3}", dog.Name, dog.Owner.Forename, dog.Owner.Surname, dog.Friends.First().Name);
                 }
             }
             _stopWatch.Stop();
@@ -169,7 +183,7 @@ namespace EntityFun.Terminal
             var dog1 = new Dog { Id = 1 };
             var dog2 = new Dog { Id = _random.Next(400, 800) };
 
-            dogService.MakeFriend(dog1, dog2);
+            dogService.MakeFriend(dog1, dog2).Wait();
             using (var context = EntityFunDbContext.Create())
             {
                 var test = context.Dogs
