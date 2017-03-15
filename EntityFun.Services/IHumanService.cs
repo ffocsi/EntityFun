@@ -12,8 +12,8 @@ namespace EntityFun.Services
     public interface IHumanService
     {
         [OperationContract]
-        Task<int> AddHuman(Human human);
+        Task<int> AddHumanAsync(Human human);
         [OperationContract]
-        Task AdoptDog(Human human, Dog dog);
+        Task AdoptDogAsync(Human human, Dog dog);
     }
 }

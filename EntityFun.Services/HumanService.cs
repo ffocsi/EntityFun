@@ -19,7 +19,7 @@ namespace EntityFun.Services
         /// </summary>
         /// <param name="human"></param>
         /// <returns></returns>
-        public async Task<int> AddHuman(Human human)
+        public async Task<int> AddHumanAsync(Human human)
         {
             using (var context = EntityFunDbContext.Create())
             {
@@ -34,7 +34,7 @@ namespace EntityFun.Services
         /// </summary>
         /// <param name="human"></param>
         /// <param name="dog"></param>
-        public async Task AdoptDog(Human human, Dog dog)
+        public async Task AdoptDogAsync(Human human, Dog dog)
         {
             using (var context = EntityFunDbContext.Create())
             {

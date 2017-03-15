@@ -52,7 +52,7 @@ namespace EntityFun.Terminal
                         Surname = _surnames[_random.Next(0, _surnames.Length)]
                     };
 
-                    newHuman.Id = await humanService.AddHuman(newHuman);
+                    newHuman.Id = await humanService.AddHumanAsync(newHuman);
                     humanRecord.Add(newHuman);
                 });
             await Task.WhenAll(humanAddTasks);
@@ -67,7 +67,7 @@ namespace EntityFun.Terminal
                         Name = _dognames[_random.Next(0, _dognames.Length)]
                     };
 
-                    newDog.Id = await dogService.AddDog(newDog);
+                    newDog.Id = await dogService.AddDogAsync(newDog);
                     dogRecord.Add(newDog);
                 });
             await Task.WhenAll(dogAddTasks);
@@ -76,7 +76,7 @@ namespace EntityFun.Terminal
                 .Select(async i =>
                 {
                     var firstFriendId = _random.Next(0, numberOfIterations - 1);
-                    await dogService.MakeFriend(dogRecord[i], dogRecord[firstFriendId]);
+                    await dogService.MakeFriendAsync(dogRecord[i], dogRecord[firstFriendId]);
 
                     var secondFriendId = _random.Next(0, numberOfIterations - 1);
                     while (secondFriendId == firstFriendId)
@@ -84,14 +84,14 @@ namespace EntityFun.Terminal
                         secondFriendId = _random.Next(0, numberOfIterations - 1);
                     }
 
-                    await dogService.MakeFriend(new Dog { Id = i }, new Dog { Id = secondFriendId });
+                    await dogService.MakeFriendAsync(new Dog { Id = i }, new Dog { Id = secondFriendId });
                 });
             await Task.WhenAll(dogFriendTasks);
 
             var adoptDogTasks = Enumerable.Range(0, numberOfIterations)
                 .Select(async i =>
                 {
-                    await humanService.AdoptDog(humanRecord[i], dogRecord[i]);
+                    await humanService.AdoptDogAsync(humanRecord[i], dogRecord[i]);
                 });
             await Task.WhenAll(adoptDogTasks);
 
@@ -183,7 +183,7 @@ namespace EntityFun.Terminal
             var dog1 = new Dog { Id = 1 };
             var dog2 = new Dog { Id = _random.Next(400, 800) };
 
-            dogService.MakeFriend(dog1, dog2).Wait();
+            dogService.MakeFriendAsync(dog1, dog2).Wait();
             using (var context = EntityFunDbContext.Create())
             {
                 var test = context.Dogs
@@ -196,7 +196,7 @@ namespace EntityFun.Terminal
                 }
             }
 
-            var newDog = dogService.AddDog(new Dog { Name = "Brenford", DateOfBirth = DateTime.Now.AddYears(-2) });
+            var newDog = dogService.AddDogAsync(new Dog { Name = "Brenford", DateOfBirth = DateTime.Now.AddYears(-2) });
             Console.ReadKey();
         }
     }

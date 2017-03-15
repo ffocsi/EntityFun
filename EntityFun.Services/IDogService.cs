@@ -12,8 +12,8 @@ namespace EntityFun.Services
     public interface IDogService
     {
         [OperationContract]
-        Task<int> AddDog(Dog dog);
+        Task<int> AddDogAsync(Dog dog);
         [OperationContract]
-        Task MakeFriend(Dog dog, Dog friend);
+        Task MakeFriendAsync(Dog dog, Dog friend);
     }
 }
