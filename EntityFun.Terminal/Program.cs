@@ -188,8 +188,8 @@ namespace EntityFun.Terminal
         public static void Main(string[] args)
         {
             _stopWatch.Start();
-            //DoEverything().Wait();
-            DoEverythingSync();
+            DoEverything().Wait();
+            //DoEverythingSync();
             _stopWatch.Stop();
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
             var elapsedTicks = _stopWatch.ElapsedTicks;
