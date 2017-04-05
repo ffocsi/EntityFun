@@ -14,7 +14,7 @@ namespace EntityFun.Terminal
 {
     public class Program
     {
-        private static readonly Random _random = new Random();
+        private static readonly Random _random = new Random(9001);
         private static readonly Stopwatch _stopWatch = new Stopwatch();
 
         private static readonly string[] _forenames = {
