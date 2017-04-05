@@ -32,10 +32,19 @@ namespace EntityFun.Terminal
 
         private static void DoEverythingSync()
         {
-            //var humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
-            //var dogService = InProcFactory.CreateInstance<DogService, IDogService>();
-            var humanService = new HumanService();
-            var dogService = new DogService();
+            var useWcf = true;
+            IHumanService humanService;
+            IDogService dogService;
+            if (useWcf)
+            {
+                humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
+                dogService = InProcFactory.CreateInstance<DogService, IDogService>();
+            }
+            else
+            {
+                humanService = new HumanService();
+                dogService = new DogService();
+            }
 
             var humanRecord = new List<Human>();
             var dogRecord = new List<Dog>();
@@ -104,15 +113,24 @@ namespace EntityFun.Terminal
 
         private static async Task DoEverything()
         {
-            var humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
-            var dogService = InProcFactory.CreateInstance<DogService, IDogService>();
-            //var humanService = new HumanService();
-            //var dogService = new DogService();
+            var useWcf = true;
+            IHumanService humanService;
+            IDogService dogService;
+            if (useWcf)
+            {
+                humanService = InProcFactory.CreateInstance<HumanService, IHumanService>();
+                dogService = InProcFactory.CreateInstance<DogService, IDogService>();
+            }
+            else
+            {
+                humanService = new HumanService();
+                dogService = new DogService();
+            }
 
             var humanRecord = new List<Human>();
             var dogRecord = new List<Dog>();
 
-            var numberOfIterations = 1000;
+            var numberOfIterations = 100;
 
             var humanAddTasks = Enumerable.Range(0, numberOfIterations)
                 .Select(async i =>
